@@ -1,7 +1,7 @@
 # CPI tool
 Tool to visualise experimental CPI indices created from web scraped data.
 
-To access the tool visit https://onsprices.github.io/CPI-tool/index.html (Development version)
+To access the tool visit https://onsprices.github.io/PricesTool/index.html (Development version)
 
 TO DO:
 
