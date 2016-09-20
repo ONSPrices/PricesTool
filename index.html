@@ -237,7 +237,10 @@
             // define X, Y GLOBAL scales
             var x = d3.time.scale().range([0, width]).domain(d3.extent(currentData, function(d) { return d.date } ));
             console.log(x.domain());
-            var yExtent = d3.extent(currentData, function(d) { return +d.value } );
+            var yExtent = d3.extent(currentData, function(d) { 
+                if (+d.value !== 0)
+                    return +d.value 
+            });
             yExtent[0] = Math.floor(yExtent[0]/10)*10;
             yExtent[1] = Math.ceil(yExtent[1]/10)*10;
 
