@@ -573,9 +573,10 @@
 
         function readData(){
 
-            json_url = "data/test2.json";
+            json_url = "data/test.json";
 
             d3.json(json_url, function(error, data) {
+                console.log(data)
 
                 dvc.graphic_data_full = setDateFmt(data, dvc.essential.fmt);
                 
