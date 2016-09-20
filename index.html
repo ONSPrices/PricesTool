@@ -236,13 +236,15 @@
 
             // define X, Y GLOBAL scales
             var x = d3.time.scale().range([0, width]).domain(d3.extent(currentData, function(d) { return d.date } ));
-            console.log(x.domain());
+            // console.log(x.domain());
             var yExtent = d3.extent(currentData, function(d) { 
                 if (+d.value !== 0)
                     return +d.value 
             });
             yExtent[0] = Math.floor(yExtent[0]/10)*10;
             yExtent[1] = Math.ceil(yExtent[1]/10)*10;
+
+            console.log(yExtent);
 
             var y = d3.scale.linear().range([height , 0]).domain(yExtent);
 
@@ -255,7 +257,7 @@
                 })
                 .tickPadding(5);
 
-            console.log(x.ticks(Math.max(width/50, 2)));
+            // console.log(x.ticks(Math.max(width/50, 2)));
             xAxis.tickValues(x.ticks(Math.max(width/80, 2)));
 
             var yAxis = d3.svg.axis()
@@ -305,14 +307,17 @@
                       .attr( 'x1' , 0 )
                       .attr( 'x2', width);
 
-            svg.append("text")
+            // Add category label on top of each graph
+            svg.append("text") 
                 .attr('class', 'text')
                 .attr("y" , 10)
                 .style("fill" , "#666")
+                .style("font-size" , ".9em")
                 .attr('transform', 'translate(20,0)')
-                .text(function(d){ return d.key.replace(/\d/g,''); });
+                .text(function(d){ return d.key.replace(/^[^(a-zA-Z)]*/g,'').replace('_',' '); });
 
-            svg.filter(function(d, i) { return i%numberColumns == 0 })
+            // Add '%' to the first graph of each row
+            svg.filter(function(d, i) { return i%numberColumns == 0 }) 
                 .append("text")
                 .attr("class" , "label")
                 .attr("x" , innerPadding.left/2)
@@ -336,7 +341,7 @@
                             
                 svg.append("rect")
                  .attr('class', 'squares')
-                 .attr('id', function(d){ return d.key.replace(/\d/g,'').split(' ')[0]; })
+                 .attr('id', function(d){ return d.key.replace(/^[^(a-zA-Z)]*/g,'').split(' ')[0]; })
                 .attr('transform', 'translate(0,0)')
                 .attr("width", outerSvgWidth)  
                 .attr("height", outerSvgHeight)
@@ -579,7 +584,7 @@
             json_url = "data/test.json";
 
             d3.json(json_url, function(error, data) {
-                console.log(data)
+                // console.log(data)
 
                 dvc.graphic_data_full = setDateFmt(data, dvc.essential.fmt);
                 
