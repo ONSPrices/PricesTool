@@ -80,6 +80,26 @@
     }*/
 
 
+    input[type=checkbox] {
+        display:none;
+    }
+     
+    input[type=checkbox]#zoomCheck + label
+    {
+        background: #999;
+        height: 16px;
+        width: 16px;
+        display:inline-block;
+        padding: 0 0 0 0px;
+    }
+    input[type=checkbox]#zoomCheck:checked + label
+    {
+        background: #0080FF;
+        height: 16px;
+        width: 16px;
+        display:inline-block;
+        padding: 0 0 0 0px;
+    }
 
     
     </style>
@@ -112,8 +132,7 @@
 
             <div class="row">
                 <div class="col-sm-12 col-xs-12" id="legend"></div> 
-                <div class="col-sm-12 col-xs-12" id="zoom">
-                </div> 
+                <div class="col-sm-12 col-xs-12" id="zoom"></div> 
                 
             </div>
             
@@ -167,7 +186,6 @@
 
     var level = 0;
     var selection = "Overview"
-    var zoom = false
 
 
 
@@ -364,106 +382,26 @@
 
             d3.selectAll(".idxOption").each(showIndexes);
 
-            var checkedZoom = $('input[name="zoom"]')[0].checked
-
-            zoomInOut();
 
 
+            // ///////////////////////////////////////////////
+            var zoom = $('input[name="zoom"]')[0].checked;
 
-
-            // checkedZoom == zoom ? zoom : zoomInOut();
-
-            // if (zoom) 
-                 
+            if (zoom) zoomIn();
 
 
 
-            function zoomInOut() {
+            function zoomIn() {
 
-                // var checkedZoom = this.checked // true means User asked zoomIn, false User asked zoomOut
-
-                console.log("zoom: " + zoom + ", checkedZoom: " + checkedZoom)
-
-
-                d3.selectAll(".chart").each(function(d) {
-
-                    var ymin = d3.min(d.values.map(function(index) {
-                        return d3.min(index.values, function(c) {
-                            if (+c.value !== 0)
-                                return +c.value})
-                    }));
-                    var ymax = d3.max(d.values.map(function(index) {
-                        return d3.max(index.values, function(c) {return c.value})
-                    }));
-                    var newExtent = [ymin, ymax]
-                    var i = d3.interpolate(yExtent, newExtent);
-                    y.domain(i(1));
-                    
-                    
-                    if ((zoom == true) && (checkedZoom == true)) { // User did not change it
-                        d3.select(this).select("g.y.axis").call(yAxis)
-                        d3.select(this).select('g.y')
-                         .selectAll('.tick')                 
-                         .append('svg:line')
-                         .attr( 'y0' , 0 )
-                         .attr( 'y1' , 0 )
-                         .attr( 'x1' , 0 )
-                         .attr( 'x2', width);
-                        d3.select(this).selectAll("g.index").selectAll("path").attr("d", function(d) { 
-                            return line(d.values); 
-                        });
-
-                    }
-                    else if ((zoom == false) && (checkedZoom == true)) { // User want Zoom IN
-                        // Move the axis
-                        d3.select(this).select("g.y.axis").transition().duration(1500).call(yAxis)
-
-                        // Move the ticks
-                        d3.select(this).select('g.y')
-                         .selectAll('.tick')                 
-                         .append('svg:line')
-                         .attr( 'y0' , 0 )
-                         .attr( 'y1' , 0 )
-                         .attr( 'x1' , 0 )
-                         .attr( 'x2', width);
-                    
-                        // Move the indexes
-                        d3.select(this).selectAll("g.index").selectAll("path").transition().duration(1500).attr("d", function(d) { 
-                            return line(d.values); 
-                        });
-
-                    } 
-                    else if ((zoom == true) && (checkedZoom == false)) { // // User want Zoom OUT
-                        y.domain(yExtent);
-                        // Move the axis
-                        d3.select(this).select("g.y.axis").transition().duration(1500).call(yAxis)
-
-                        // Move the ticks
-                        d3.select(this).select('g.y')
-                         .selectAll('.tick')                 
-                         .append('svg:line')
-                         .attr( 'y0' , 0 )
-                         .attr( 'y1' , 0 )
-                         .attr( 'x1' , 0 )
-                         .attr( 'x2', width);
-                    
-                        // Move the indexes
-                        d3.select(this).selectAll("g.index").selectAll("path").transition().duration(1500).attr("d", function(d) { 
-                            return line(d.values); 
-                        });
-                    }
-                    else if ((zoom == false) && (checkedZoom == false)){ // User did not change it
-                    }
-
-                    
-
-                })
-
-                zoom = checkedZoom
-
-                
 
             }
+
+
+
+
+            
+
+
 
             //use pym to calculate chart dimensions 
             if (pymChild) {
@@ -473,12 +411,20 @@
 
         } // end drawGraphic()
 
+        function drawChart(data) {
+            drawGraphic();
+        }
+
         function changeFreq(rb) {
             drawGraphic();
         }
 
+
+
         function showIndexes() {
+            // console.log(this);
             d3.selectAll('.' + this.name).classed("opaque", !this.checked);
+
         }
 
         function changeLevel(id) {
@@ -499,6 +445,11 @@
             d3.select("#child").style("visibility", "hidden");
             drawGraphic();
         }
+
+
+        // function transition() {
+        //   d3.select(this).select("g.y.axis")
+        // }
 
         //then, onload, check if the web browser can handle 'inline svg'
         if (Modernizr) {
@@ -599,16 +550,12 @@
                   .html("Notes:" + "<br/>" + "1) The monthly series is indexed to June 2014 = 100." + "<br/>" + "2) The weekly series is indexed to the week beginning 2 June 2014 = 100. </br> 3) For more information on the construction of GEKSJ and the Unit Price Index please see appendix 1 of the 'Research indices using web scraped data: May 2016 update'."); 
 
                 d3.select("#zoom")
-                    .append('label')
-                    .attr('for', 'zoom')
-                    .text('Natural scale')
                     .append('input')
                     .attr('type', 'checkbox')
+                    .attr('id', 'zoomCheck')
                     .attr('name', 'zoom')
                     .property("checked", false)
-                    .on("click", drawGraphic)
-
-                    
+                    .on("click", drawGraphic);
 
                  
 
