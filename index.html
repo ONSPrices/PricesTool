@@ -167,7 +167,6 @@
         yAxis,
         line;
 
-
     //then, onload, check if the web browser can handle 'inline svg'
     if (Modernizr) {
 
@@ -412,9 +411,6 @@
                 .attr("transform", "translate(0," + (height + innerPadding.bottom/3) + ")")
                 .call(xAxis);
 
-            lines = g.selectAll(".index").data(function (d) { return d.values})
-                    .enter().append("g").attr("class", "index");
-
             var gAxis = g.append("g")
               .attr("class", "y axis")
               .call(yAxis)
@@ -425,13 +421,16 @@
                       .attr( 'y0' , 0 )
                       .attr( 'y1' , 0 )
                       .attr( 'x1' , 0 )
-                      .attr( 'x2', width); 
+                      .attr( 'x2', width);
+
+            lines = g.selectAll(".index").data(function (d) { return d.values})
+                    .enter().append("g").attr("class", "index");
 
             lines.append("path")
               .attr("class", function(d, i) { return 'line line-' + i; }) // line-X and index-X to be changed with index code
               .attr("d", function(d) { 
                 return line(d.values); 
-            });
+            })
 
 
             if (naturalScale) {
