@@ -272,9 +272,9 @@
 
             var yAxis = d3.svg.axis()
                 .scale(y)
+                .ticks(Math.max(height/50, 2))
                 .orient("left");
 
-            yAxis.ticks(Math.max(height/50, 2));
 
             var line = d3.svg.line()
                 .defined(function(d) { return d.value != ''; })
@@ -287,14 +287,25 @@
                 .key(function(d) { return d.index; })
                 .entries(currentData);
 
-            var div = d3.select("#graphic").selectAll(".chart").data(dataByCategory)
+            var div = d3.select("#graphic").selectAll(".chart").data(dataByCategory) 
 
-            div.enter().append("div").attr("class", "chart")
+            div.enter().append("div").attr("class", "chart") 
                 .append("svg").append("g")
 
             var svg = div.select("svg")
                   .attr("width", outerSvgWidth )
                   .attr("height", outerSvgHeight )
+
+
+            // Add category label on top of each graph
+            svg.append("text") 
+                .attr('class', 'text')
+                .attr("y" , 10)
+                .style("fill" , "#666")
+                .style("font-size" , ".9em")
+                .attr('transform', 'translate(20,0)')
+                .text(function(d){ return d.key.replace(/^[^(a-zA-Z)]*/g,'').replace('_',' '); });
+
             var g = svg.select("g")
                 .attr("class", "graphArea")
                 .attr("transform", "translate(" + innerPadding.left + "," + innerPadding.top + ")")
@@ -305,6 +316,12 @@
                 .attr("transform", "translate(0," + (height + innerPadding.bottom/3) + ")")
                 .call(xAxis);
 
+            lines = g.selectAll(".index").data(function (d) { return d.values})
+                    .enter().append("g").attr("class", "index");
+
+
+
+            /////////// move to zoomInOut
             var gAxis = g.append("g")
               .attr("class", "y axis")
               .call(yAxis)
@@ -315,16 +332,16 @@
                       .attr( 'y0' , 0 )
                       .attr( 'y1' , 0 )
                       .attr( 'x1' , 0 )
-                      .attr( 'x2', width);
+                      .attr( 'x2', width); 
 
-            // Add category label on top of each graph
-            svg.append("text") 
-                .attr('class', 'text')
-                .attr("y" , 10)
-                .style("fill" , "#666")
-                .style("font-size" , ".9em")
-                .attr('transform', 'translate(20,0)')
-                .text(function(d){ return d.key.replace(/^[^(a-zA-Z)]*/g,'').replace('_',' '); });
+            lines.append("path")
+              .attr("class", function(d, i) { return 'line line-' + i; }) // line-X and index-X to be changed with index code
+              .attr("d", function(d) { 
+                return line(d.values); 
+            });
+
+
+            /////////// move to zoomInOut
 
             // Add '%' to the first graph of each row
             svg.filter(function(d, i) { return i%numberColumns == 0 }) 
@@ -336,16 +353,6 @@
                 .style("font-weight" , "normal" )
                 .style("text-anchor" , "start" )
                 .text(dvc.essential.yAxisLabel);
-
-            lines = g.selectAll(".index").data(function (d) { return d.values})
-                    .enter().append("g").attr("class", "index");
-
-            lines.append("path")
-              .attr("class", function(d, i) { return 'line line-' + i; }) // line-X and index-X to be changed with index code
-              .attr("d", function(d) { 
-                return line(d.values); 
-            });
-
 
             if (level == 0) {
                             
@@ -366,100 +373,102 @@
 
             var checkedZoom = $('input[name="zoom"]')[0].checked
 
-            zoomInOut();
+            if (checkedZoom) {
+                zoomInOut()
+                zoomOut();
+            };
 
 
-
-
-            // checkedZoom == zoom ? zoom : zoomInOut();
-
-            // if (zoom) 
                  
 
+            function zoomOut() {
 
+                d3.selectAll(".chart").each(function(d) {
+
+
+                    y.domain(yExtent);
+
+                    d3.select(this).select("g.y.axis").transition().delay(2000).duration(1500).call(yAxis)
+
+
+                    // Move the ticks
+                    d3.select(this).select("g.y.axis").selectAll('line').transition().delay(2000).duration(100).attr( 'x2', width)
+                
+                    // Move the indexes
+                    d3.select(this).selectAll("g.index").selectAll("path").transition().delay(2000).duration(1500).attr("d", function(d) { 
+                        return line(d.values); 
+                    });
+                })
+            }
 
             function zoomInOut() {
 
-                // var checkedZoom = this.checked // true means User asked zoomIn, false User asked zoomOut
 
                 console.log("zoom: " + zoom + ", checkedZoom: " + checkedZoom)
 
 
                 d3.selectAll(".chart").each(function(d) {
 
-                    var ymin = d3.min(d.values.map(function(index) {
+
+
+                    var ymin = Math.floor(d3.min(d.values.map(function(index) {
                         return d3.min(index.values, function(c) {
                             if (+c.value !== 0)
                                 return +c.value})
-                    }));
-                    var ymax = d3.max(d.values.map(function(index) {
+                    })));
+                    var ymax = Math.ceil(d3.max(d.values.map(function(index) {
                         return d3.max(index.values, function(c) {return c.value})
-                    }));
+                    })));
+                    
+                    if (ymax%2 != 0) 
+                        ymax = ymax + 1
+
+                    if (ymin%2 != 0) 
+                        ymin = ymin - 1
+
+
+
                     var newExtent = [ymin, ymax]
-                    var i = d3.interpolate(yExtent, newExtent);
-                    y.domain(i(1));
-                    
-                    
-                    if ((zoom == true) && (checkedZoom == true)) { // User did not change it
-                        d3.select(this).select("g.y.axis").call(yAxis)
-                        d3.select(this).select('g.y')
-                         .selectAll('.tick')                 
-                         .append('svg:line')
-                         .attr( 'y0' , 0 )
-                         .attr( 'y1' , 0 )
-                         .attr( 'x1' , 0 )
-                         .attr( 'x2', width);
-                        d3.select(this).selectAll("g.index").selectAll("path").attr("d", function(d) { 
-                            return line(d.values); 
-                        });
 
-                    }
-                    else if ((zoom == false) && (checkedZoom == true)) { // User want Zoom IN
-                        // Move the axis
-                        d3.select(this).select("g.y.axis").transition().duration(1500).call(yAxis)
-
-                        // Move the ticks
-                        d3.select(this).select('g.y')
-                         .selectAll('.tick')                 
-                         .append('svg:line')
-                         .attr( 'y0' , 0 )
-                         .attr( 'y1' , 0 )
-                         .attr( 'x1' , 0 )
-                         .attr( 'x2', width);
                     
-                        // Move the indexes
-                        d3.select(this).selectAll("g.index").selectAll("path").transition().duration(1500).attr("d", function(d) { 
-                            return line(d.values); 
-                        });
 
-                    } 
-                    else if ((zoom == true) && (checkedZoom == false)) { // // User want Zoom OUT
-                        y.domain(yExtent);
-                        // Move the axis
-                        d3.select(this).select("g.y.axis").transition().duration(1500).call(yAxis)
+                    y.domain(newExtent);
 
-                        // Move the ticks
-                        d3.select(this).select('g.y')
-                         .selectAll('.tick')                 
-                         .append('svg:line')
-                         .attr( 'y0' , 0 )
-                         .attr( 'y1' , 0 )
-                         .attr( 'x1' , 0 )
-                         .attr( 'x2', width);
-                    
-                        // Move the indexes
-                        d3.select(this).selectAll("g.index").selectAll("path").transition().duration(1500).attr("d", function(d) { 
-                            return line(d.values); 
-                        });
-                    }
-                    else if ((zoom == false) && (checkedZoom == false)){ // User did not change it
+                    values = yAxis.scale().ticks(yAxis.ticks()[0])
+
+                    while (values[values.length-1] < ymax) {
+                        
+                        ymax++;
+                        newExtent = [ymin, ymax]
+                        y.domain(newExtent);
+                        values = yAxis.scale().ticks(yAxis.ticks()[0])   
                     }
 
-                    
+                    while (values[0] > ymin) {
+                        
+                        ymin--;
+                        newExtent = [ymin, ymax]
+                        y.domain(newExtent);
+                        values = yAxis.scale().ticks(yAxis.ticks()[0])   
+                    }
+
+
+                    d3.select(this).select("g.y.axis").transition().duration(1500).call(yAxis)
+
+
+                    // Move the ticks
+                    d3.select(this).select("g.y.axis").selectAll('line').transition().duration(100).attr( 'x2', width)
+                
+                    // Move the indexes
+                    d3.select(this).selectAll("g.index").selectAll("path").transition().duration(1500).attr("d", function(d) { 
+                        return line(d.values); 
+                    });
 
                 })
 
                 zoom = checkedZoom
+
+                
 
                 
 
@@ -499,6 +508,26 @@
             d3.select("#child").style("visibility", "hidden");
             drawGraphic();
         }
+
+        // function update() {
+
+        //     naturalScale = this.checked
+
+        //     d3.selectAll(".chart").each(function(d) {
+
+        //         var ymin = d3.min(d.values.map(function(index) {
+        //                 return d3.min(index.values, function(c) {
+        //                     if (+c.value !== 0)
+        //                         return +c.value})
+        //         }));
+        //         var ymax = d3.max(d.values.map(function(index) {
+        //                 return d3.max(index.values, function(c) {return c.value})
+        //             }));
+
+        //     })
+
+
+        // }
 
         //then, onload, check if the web browser can handle 'inline svg'
         if (Modernizr) {
