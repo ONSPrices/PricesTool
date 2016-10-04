@@ -7,7 +7,7 @@ TO DO:
 
 - [ ]  Labels following mouse
 - [x]  Bigger Title 
-- [ ]  Zoom Option
+- [x]  Zoom Option
 - [x]  Add all five indexes: LCPI, Daily Chain, Unit Price Index, GEKSJ, CLIP 
 - [x]  Option to turn ON/OFF indexes   
 - [x]  Level structure 
