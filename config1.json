@@ -15,7 +15,7 @@
 
             "fmt": "%d/%m/%y",
         
-            "legendLabels" : ["GEKSJ Index", "Unit Price Index" ],
+            "legendLabels" : ["GEKSJ Index", "Unit Price Index", "Index2", "Index3" ],
 
             "lastUpdate": "August 2016",
         
