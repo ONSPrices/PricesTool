@@ -48,6 +48,16 @@
         opacity: .8; 
         stroke-width: 2px;
     }
+    .line-2 { 
+        stroke:#2ca02c; 
+        opacity: .8; 
+        stroke-width: 2px;
+    }
+    .line-3 { 
+        stroke:#d62728; 
+        opacity: .8; 
+        stroke-width: 2px;
+    }
 
     .opaque { 
         opacity: .2; 
@@ -166,6 +176,8 @@
         yExtent,
         yAxis,
         line;
+
+    var alcol;
 
     //then, onload, check if the web browser can handle 'inline svg'
     if (Modernizr) {
@@ -343,14 +355,18 @@
                 indexes.push(cb.name)
             })
 
+
+
             yExtent = d3.extent(currentData, function(d) { 
                 if (+d.value !== 0) 
                     return +d.value 
             });
+
+
             yExtent[0] = Math.floor(yExtent[0]/10)*10;
             yExtent[1] = Math.ceil(yExtent[1]/10)*10;
 
-            // console.log(yExtent);
+            
 
             y = d3.scale.linear().range([height , 0]).domain(yExtent);
 
@@ -441,8 +457,10 @@
                                 return +c.value})
                     })));
                     var ymax = Math.ceil(d3.max(d.values.map(function(index) {
-                        return d3.max(index.values, function(c) {return c.value})
+                        return d3.max(index.values, function(c) {return +c.value})
                     })));
+
+
                     
                     if (ymax%2 != 0) 
                         ymax = ymax + 1
@@ -523,6 +541,8 @@
         function updateGraphic() {
 
             var currentData = dvc.graphic_data_full[frequency][level][selection];
+
+
             if (naturalScale) {
                 d3.selectAll(".chart").each(function(d) {
                     var ymin = Math.floor(d3.min(d.values.map(function(index) {
@@ -530,9 +550,13 @@
                             if (+c.value !== 0)
                                 return +c.value})
                     })));
+
+                    alcol = d.values
                     var ymax = Math.ceil(d3.max(d.values.map(function(index) {
-                        return d3.max(index.values, function(c) {return c.value})
+                        return d3.max(index.values, function(c) {return +c.value})
                     })));
+
+
                     
                     if (ymax%2 != 0) 
                         ymax = ymax + 1
@@ -544,11 +568,14 @@
 
                     var newExtent = [ymin, ymax]
 
+                    // console.log(ymax)
+
                     
 
                     y.domain(newExtent);
 
                     values = yAxis.scale().ticks(yAxis.ticks()[0])
+                    // console.log(values)
 
                     while (values[values.length-1] < ymax) {
                         
@@ -566,6 +593,7 @@
                         values = yAxis.scale().ticks(yAxis.ticks()[0])   
                     }
 
+                    // console.log(newExtent)
 
                     d3.select(this).select("g.y.axis").transition().duration(1500).call(yAxis)
 
