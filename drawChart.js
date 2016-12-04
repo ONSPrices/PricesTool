@@ -242,6 +242,7 @@
                 .key(function(d) { return d.category; })
                 .key(function(d) { return d.index; })
                 .entries(currentData);
+            // console.log(dataByCategory);
 
             var div = d3.select("#graphic").selectAll(".chart").data(dataByCategory)
 
@@ -260,7 +261,7 @@
                 .style("fill" , "#666")
                 .style("font-size" , ".9em")
                 .attr('transform', 'translate(20,0)')
-                .text(function(d){ return d.key.replace(/^[^(a-zA-Z)]*/g,'').replace('_',' '); });
+                .text(function(d){ return d.key.replace(/^[^(a-zA-Z)]*/g,''); });
 
             var g = svg.select("g")
                 .attr("class", "graphArea")
@@ -474,7 +475,7 @@
         }
 
         function readData() {
-            json_url = "data/test.json";
+            json_url = "data/data.json";
             d3.json(json_url, function(error, data) {
                 dvc.graphic_data_full = data;
                 pymChild = new pym.Child({renderCallback: drawGraphic});
