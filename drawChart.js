@@ -24,6 +24,8 @@
 
     var alcol;
 
+    var indexOrder = {"GEKS": 0, "unit_price": 1, "daily_chained": 2, "clip": 3 }
+
     //then, onload, check if the web browser can handle 'inline svg'
     if (Modernizr) {
 
@@ -57,6 +59,7 @@
                     .enter()
                     .append('label')
                         .attr('for',function(d,i){ return 'line-' + i; })
+                        .attr("test", function(d,i){ console.log('line-' + i + "index: " + d); })
                         .text(function(d) { return d; })
                     .append("input")
                         .property("checked", function(d, i) {
@@ -289,7 +292,8 @@
                     .enter().append("g").attr("class", "index");
 
             lines.append("path")
-              .attr("class", function(d, i) { return 'line line-' + i; }) // line-X and index-X to be changed with index code
+              .attr("class", function(d) { return 'line line-' + indexOrder[d.key]; }) // line-X and index-X to be changed with index code
+              .attr("test", function(d, i) { console.log(d.key); })
               .attr("d", function(d) {
                 return line(d.values);
             })
@@ -422,11 +426,6 @@
 
                     values = yAxis.scale().ticks(yAxis.ticks()[0])
 
-                    console.log("Before: "+values)
-                    
-
-
-
                     while (values[0] > ymin) {
 
                         ymin--;
@@ -437,8 +436,6 @@
 
                     }
 
-                    console.log("After max: "+values)
-
                     while (values[values.length-1] < ymax) {
 
                         ymax++;
@@ -447,10 +444,6 @@
                         values = yAxis.scale().ticks(yAxis.ticks()[0])
                         
                     }
-
-
-
-                    console.log("After min: "+values)
 
                     d3.select(this).select("g.y.axis").transition().duration(1500).call(yAxis)
 
