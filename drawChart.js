@@ -414,22 +414,18 @@
 
                     var newExtent = [ymin, ymax]
 
-                    // console.log(ymax)
+                    
 
 
 
                     y.domain(newExtent);
 
                     values = yAxis.scale().ticks(yAxis.ticks()[0])
-                    // console.log(values)
 
-                    while (values[values.length-1] < ymax) {
+                    console.log("Before: "+values)
+                    
 
-                        ymax++;
-                        newExtent = [ymin, ymax]
-                        y.domain(newExtent);
-                        values = yAxis.scale().ticks(yAxis.ticks()[0])
-                    }
+
 
                     while (values[0] > ymin) {
 
@@ -437,9 +433,24 @@
                         newExtent = [ymin, ymax]
                         y.domain(newExtent);
                         values = yAxis.scale().ticks(yAxis.ticks()[0])
+                        // console.log(values)
+
                     }
 
-                    // console.log(newExtent)
+                    console.log("After max: "+values)
+
+                    while (values[values.length-1] < ymax) {
+
+                        ymax++;
+                        newExtent = [ymin, ymax]
+                        y.domain(newExtent);
+                        values = yAxis.scale().ticks(yAxis.ticks()[0])
+                        
+                    }
+
+
+
+                    console.log("After min: "+values)
 
                     d3.select(this).select("g.y.axis").transition().duration(1500).call(yAxis)
 
